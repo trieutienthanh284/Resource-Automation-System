@@ -1,13 +1,22 @@
-# Bỏ qua môi trường ảo và cache của Python
+# 1. Két sắt bảo mật (QUAN TRỌNG NHẤT)
+.env
+
+# 2. Môi trường ảo và Cache Python
 .venv/
 __pycache__/
+*.pyc
 
-# Bỏ qua file trung gian
-image_links.csv
-
-# Bỏ qua thư mục nháp của hệ thống
+# 3. Thư mục rác và tạm tính của Agent
 temp_images/
 resource/unprocessed/
 
-# Bỏ qua file cấu hình IDE
+# 4. Các file dữ liệu trung gian
+image_links.csv
+
+# 5. Cấu hình riêng của trình soạn thảo (PyCharm/VSCode)
 .idea/
+.vscode/
+
+# 6. File rác của hệ điều hành (Windows/Mac)
+Thumbs.db
+.DS_Store

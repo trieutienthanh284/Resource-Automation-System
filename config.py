@@ -6,7 +6,7 @@
 SUPPORTED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp']
 
 # 2. QUY CHUẨN LỌC RÁC (Garbage Collection)
-MIN_FILE_SIZE_KB = 10  # Dung lượng tối thiểu. File < 10KB sẽ bị xóa thẳng tay.
+MIN_FILE_SIZE_KB = 15  # Dung lượng tối thiểu. File < 15KB sẽ bị xóa thẳng tay.
 
 # 3. QUY CHUẨN XỬ LÝ NGOẠI LỆ (.SVG)
 VECTOR_EXTENSIONS = ['.svg']      # Các file AI không đọc được

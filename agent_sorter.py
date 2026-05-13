@@ -9,8 +9,9 @@ from google.genai import types
 import config
 from auto_sync import sync
 
-API_KEY = "AIzaSyATcPec9FiZSTuu4VlLo8TVwQtCTEe43YA"  # Dán Key của bạn vào đây
-client = genai.Client(api_key=API_KEY)
+from dotenv import load_dotenv
+load_dotenv()
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
 
 def sort_images(input_dir, base_output_dir):
@@ -92,5 +93,5 @@ def sort_images(input_dir, base_output_dir):
     print("\n🎉 HOÀN TẤT PHÂN LOẠI!")
     sync()
 
-if __name__ == "__main__":
+def run_sorter():
     sort_images('temp_images', 'resource')

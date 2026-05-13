@@ -56,6 +56,6 @@ def download_images(csv_file, output_dir, limit=10):
 if __name__ == "__main__":
     FILE_CSV = 'image_links.csv'
     THU_MUC_LUU = 'temp_images'
-    SO_LUONG_TEST = 20
+    SO_LUONG_TEST = 15
 
     download_images(FILE_CSV, THU_MUC_LUU, SO_LUONG_TEST)

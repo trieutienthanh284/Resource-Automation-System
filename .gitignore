@@ -1,13 +1,13 @@
-# 1. Bỏ qua môi trường ảo của Python (rất nặng)
+# Bỏ qua môi trường ảo và cache của Python
 .venv/
+__pycache__/
 
-# 2. Bỏ qua các file cấu hình giao diện của PyCharm
-.idea/
+# Bỏ qua file trung gian
+image_links.csv
 
-# 3. Bỏ qua thư mục nháp và rác của AI Agent
+# Bỏ qua thư mục nháp của hệ thống
 temp_images/
 resource/unprocessed/
 
-# 4. Bỏ qua các file ẩn của hệ điều hành
-.DS_Store
-Thumbs.db
+# Bỏ qua file cấu hình IDE
+.idea/

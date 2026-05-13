@@ -47,9 +47,7 @@ def crawl_image_links(target_url, output_csv_path):
         print(f"❌ Lỗi: Agent không thể truy cập trang web này. Chi tiết: {e}")
 
 
-if __name__ == "__main__":
-    # URL mục tiêu (bạn có thể thay đổi link này sang web khác sau)
+def run_scraper():
     TRANG_WEB_MUC_TIEU = "https://en.wikipedia.org/wiki/FC_Barcelona"
     FILE_XUAT_RA = "image_links.csv"
-
     crawl_image_links(TRANG_WEB_MUC_TIEU, FILE_XUAT_RA)

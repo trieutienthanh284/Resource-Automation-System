@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
-
 def sort_images(input_dir, base_output_dir):
     print("🤖 Agent AI đang khởi động, đọc sổ tay quy chuẩn...\n")
 

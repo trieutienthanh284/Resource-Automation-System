@@ -5,7 +5,7 @@ import time
 from google import genai
 from google.genai import types
 
-# Nhập khẩu bộ quy chuẩn từ file rules.py
+# Nhập khẩu bộ quy chuẩn từ file config.py
 import config
 from auto_sync import sync
 
@@ -50,7 +50,6 @@ def sort_images(input_dir, base_output_dir):
 
         print(f"👀 Đang đưa cho AI phân tích: {filename}...")
 
-        # ... (Đoạn code try...except gọi genai.Client cũ giữ nguyên)
 
         try:
             sample_file = client.files.upload(file=file_path)

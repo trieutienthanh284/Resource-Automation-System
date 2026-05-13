@@ -49,7 +49,7 @@ def crawl_image_links(target_url, output_csv_path):
 
 if __name__ == "__main__":
     # URL mục tiêu (bạn có thể thay đổi link này sang web khác sau)
-    TRANG_WEB_MUC_TIEU = "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup"
+    TRANG_WEB_MUC_TIEU = "https://vi.wikipedia.org/wiki/%C4%90%E1%BB%99i_tuy%E1%BB%83n_b%C3%B3ng_%C4%91%C3%A1_qu%E1%BB%91c_gia_Brasil"
     FILE_XUAT_RA = "image_links.csv"
 
     crawl_image_links(TRANG_WEB_MUC_TIEU, FILE_XUAT_RA)

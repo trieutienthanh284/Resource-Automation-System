@@ -7,6 +7,7 @@ from google.genai import types
 
 # Nhập khẩu bộ quy chuẩn từ file rules.py
 import config
+from auto_sync import sync
 
 API_KEY = "AIzaSyATcPec9FiZSTuu4VlLo8TVwQtCTEe43YA"  # Dán Key của bạn vào đây
 client = genai.Client(api_key=API_KEY)
@@ -72,7 +73,7 @@ def sort_images(input_dir, base_output_dir):
             shutil.move(file_path, os.path.join(quarantine_dir, filename))
 
     print("\n🎉 HOÀN TẤT PHÂN LOẠI!")
-
+    sync()
 
 if __name__ == "__main__":
     sort_images('temp_images', 'resource')

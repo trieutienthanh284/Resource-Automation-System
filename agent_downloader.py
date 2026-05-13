@@ -53,9 +53,7 @@ def download_images(csv_file, output_dir, limit=10):
         print(f"❌ Lỗi: Không tìm thấy file {csv_file}.")
 
 
-if __name__ == "__main__":
+def run_downloader():
     FILE_CSV = 'image_links.csv'
     THU_MUC_LUU = 'temp_images'
-    SO_LUONG_TEST = 30
-
-    download_images(FILE_CSV, THU_MUC_LUU, SO_LUONG_TEST)
+    download_images(FILE_CSV, THU_MUC_LUU, limit=30)

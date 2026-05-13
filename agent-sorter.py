@@ -24,15 +24,33 @@ def sort_images(input_dir, base_output_dir):
         file_path = os.path.join(input_dir, filename)
         if not os.path.isfile(file_path): continue
 
+        # Lấy đuôi file và dung lượng
         ext = os.path.splitext(filename)[1].lower()
+        file_size_kb = os.path.getsize(file_path) / 1024
 
-        # 1. Đọc luật định dạng: Nếu file không hợp lệ -> Cách ly
+        # KIỂM TRA LUẬT 2: LỌC RÁC
+        if file_size_kb < config.MIN_FILE_SIZE_KB:
+            print(f"🗑️ Đang xóa rác: {filename} (Chỉ nặng {file_size_kb:.1f} KB)")
+            os.remove(file_path)  # Tiêu hủy luôn
+            continue
+
+        # KIỂM TRA LUẬT 3: LUỒNG CAO TỐC CHO SVG
+        if ext in config.VECTOR_EXTENSIONS:
+            print(f"⚡ Đẩy thẳng file Vector: {filename} vào kho (Bypass AI)")
+            target_dir = os.path.join(base_output_dir, config.VECTOR_DEFAULT_DIR)
+            if not os.path.exists(target_dir): os.makedirs(target_dir)
+            shutil.move(file_path, os.path.join(target_dir, filename))
+            continue
+
+        # KIỂM TRA LUẬT 1: CHẶN ĐUÔI FILE LẠ
         if ext not in config.SUPPORTED_EXTENSIONS:
-            print(f"⏩ Bỏ qua {filename} (Định dạng {ext} không hỗ trợ)")
+            print(f"⏩ Đưa vào khu cách ly: {filename} (Định dạng {ext} không hỗ trợ)")
             shutil.move(file_path, os.path.join(quarantine_dir, filename))
             continue
 
-        print(f"👀 Đang phân tích: {filename}...")
+        print(f"👀 Đang đưa cho AI phân tích: {filename}...")
+
+        # ... (Đoạn code try...except gọi genai.Client cũ giữ nguyên)
 
         try:
             sample_file = client.files.upload(file=file_path)

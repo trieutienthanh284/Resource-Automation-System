@@ -8,7 +8,7 @@ from agent_sorter import run_sorter
 
 def main():
     # --- CẤU HÌNH NHANH TẠI ĐÂY ---
-    URL_MUC_TIEU = "https://en.wikipedia.org/wiki/FC_Barcelona"
+    URL_MUC_TIEU = "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup"
     FILE_CSV = "image_links.csv"
     KHO_TAM = "temp_images"
     KHO_THANH_PHAM = "resource"

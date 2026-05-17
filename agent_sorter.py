@@ -2,7 +2,7 @@ import os
 import shutil
 import json
 import time
-import hashlib  # Công cụ tạo mã hash chống trùng tên file
+import hashlib
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -10,12 +10,10 @@ from dotenv import load_dotenv
 import config
 from auto_sync import sync
 
-# Nạp các biến môi trường từ file .env bí mật
 load_dotenv()
 
 
 def generate_short_hash(file_path):
-    """Tính toán dữ liệu pixel của ảnh để tạo ra 4 ký tự ngẫu nhiên chống trùng lặp"""
     hasher = hashlib.md5()
     with open(file_path, 'rb') as f:
         buf = f.read(1024)
@@ -26,7 +24,6 @@ def generate_short_hash(file_path):
 
 
 def sort_images(input_dir, base_output_dir, target_topic):
-    # Khởi tạo Client an toàn bên trong hàm để chắc chắn nhận được API_KEY từ file .env
     API_KEY = os.environ.get("GEMINI_API_KEY")
     if not API_KEY:
         print("❌ Lỗi: Không tìm thấy GEMINI_API_KEY trong file .env. Vui lòng kiểm tra lại két sắt!")
@@ -37,9 +34,8 @@ def sort_images(input_dir, base_output_dir, target_topic):
 
     if not os.path.exists(input_dir): return
 
-    # Khu vực cách ly cho các file lỗi hoặc không khớp chủ đề
     quarantine_dir = os.path.join(base_output_dir, 'unprocessed')
-    if not os.path.exists(quarantine_dir): os.makedirs(quarantine_dir)
+    os.makedirs(quarantine_dir, exist_ok=True)
 
     for filename in os.listdir(input_dir):
         file_path = os.path.join(input_dir, filename)
@@ -48,34 +44,30 @@ def sort_images(input_dir, base_output_dir, target_topic):
         ext = os.path.splitext(filename)[1].lower()
         file_size_kb = os.path.getsize(file_path) / 1024
 
-        # KIỂM TRA LUẬT 2: LỌC RÁC DUNG LƯỢNG THẤP
         if file_size_kb < config.MIN_FILE_SIZE_KB:
-            print(f"🗑️ Đang xóa rác: {filename} (Chỉ nặng {file_size_kb:.1f} KB)")
+            print(f"🗑️ Đang xóa rác: {filename} ({file_size_kb:.1f} KB)")
             os.remove(file_path)
             continue
 
-        # KIỂM TRA LUẬT 3: LUỒNG CAO TỐC CHO SVG
         if ext in config.VECTOR_EXTENSIONS:
-            print(f"⚡ Đẩy thẳng file Vector: {filename} vào kho (Bypass AI)")
+            print(f"⚡ Đẩy thẳng file Vector: {filename} vào kho")
             target_dir = os.path.join(base_output_dir, config.VECTOR_DEFAULT_DIR)
-            if not os.path.exists(target_dir): os.makedirs(target_dir)
+            os.makedirs(target_dir, exist_ok=True)
             shutil.move(file_path, os.path.join(target_dir, filename))
             continue
 
-        # KIỂM TRA LUẬT 1: CHẶN ĐUÔI FILE LẠ KHÔNG HỖ TRỢ
         if ext not in config.SUPPORTED_EXTENSIONS:
-            print(f"⏩ Đưa vào khu cách ly: {filename} (Định dạng {ext} không hỗ trợ)")
+            print(f"⏩ Đưa vào khu cách ly: {filename}")
             shutil.move(file_path, os.path.join(quarantine_dir, filename))
             continue
 
         print(f"👀 Đang đưa cho AI phân tích sâu: {filename}...")
 
         try:
-            # VÁ LỖI QUAN TRỌNG: Đổi từ file= thành file_path= đúng chuẩn Google SDK mới
+            # Truyền chuẩn theo SDK mới bằng file_path=
             sample_file = client.files.upload(file_path=file_path)
             categories_str = ", ".join(config.ALLOWED_CATEGORIES)
 
-            # Đưa chủ đề bạn nhập từ bàn phím vào Prompt gửi cho Gemini
             prompt = config.AGENT_PROMPT_TEMPLATE.format(
                 target_topic=target_topic,
                 categories=categories_str
@@ -87,51 +79,40 @@ def sort_images(input_dir, base_output_dir, target_topic):
                 config=types.GenerateContentConfig(response_mime_type="application/json")
             )
 
-            # Làm sạch chuỗi phản hồi phòng hờ AI trả về bọc trong ký tự markdown ```json
+            # Làm sạch chuỗi JSON phòng hờ lỗi
             raw_text = response.text.strip()
             if raw_text.startswith("```json"):
                 raw_text = raw_text[7:]
             if raw_text.endswith("```"):
                 raw_text = raw_text[:-3]
-            raw_text = raw_text.strip()
 
-            result = json.loads(raw_text)
+            result = json.loads(raw_text.strip())
 
-            # KIỂM TRA XEM AI CÓ ĐÁNH GIÁ LÀ KHỚP CHỦ ĐỀ KHÔNG
             is_matched = result.get("is_matched", False)
-
             if not is_matched:
                 print(f"   ❌ Không khớp chủ đề [{target_topic}] -> Đẩy vào unprocessed.")
                 shutil.move(file_path, os.path.join(quarantine_dir, filename))
                 client.files.delete(name=sample_file.name)
                 continue
 
-            # Ép danh mục chuẩn hóa
             category = result.get("category", "others")
             if category not in config.ALLOWED_CATEGORIES:
                 category = "others"
 
-            # TRÍCH XUẤT ĐẶC TÍNH ĐỂ ĐẶT TÊN FILE THEO ĐỊNH DẠNG MỚI (V2)
             main_color = result.get("main_color", "unknown").lower().replace(" ", "")
             keywords = result.get("keywords", "asset").lower().replace(" ", "_")
             short_hash = generate_short_hash(file_path)
-
-            # Làm sạch chuỗi tên chủ đề (bỏ dấu cách/ký tự lạ) để đưa vào tên file
             safe_topic = "".join([c for c in target_topic if c.isalnum()]).lower()
 
-            # Công thức ráp tên mới cực đẹp: cauthu_red_messi_ghi_ban_8a3f.jpg
             new_filename = f"{safe_topic}_{main_color}_{keywords}_{short_hash}{ext}"
-
-            print(f"   -> Khớp! Đưa vào [{category}] | Tên mới nâng cấp: {new_filename}")
+            print(f"   -> Khớp! Đưa vào [{category}] | Tên mới: {new_filename}")
 
             target_dir = os.path.join(base_output_dir, category)
-            if not os.path.exists(target_dir): os.makedirs(target_dir)
+            os.makedirs(target_dir, exist_ok=True)  # Đảm bảo thư mục luôn được tạo
 
-            # Di chuyển và đổi tên file
             shutil.move(file_path, os.path.join(target_dir, new_filename))
             client.files.delete(name=sample_file.name)
 
-            # Đọc luật nhịp độ tránh lỗi Too Many Requests
             print(f"   ⏳ Nghỉ {config.RATE_LIMIT_SLEEP} giây để tránh quá tải API...")
             time.sleep(config.RATE_LIMIT_SLEEP)
 

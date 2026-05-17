@@ -71,7 +71,8 @@ def sort_images(input_dir, base_output_dir, target_topic):
         print(f"👀 Đang đưa cho AI phân tích sâu: {filename}...")
 
         try:
-            sample_file = client.files.upload(file=file_path)
+            # VÁ LỖI QUAN TRỌNG: Đổi từ file= thành file_path= đúng chuẩn Google SDK mới
+            sample_file = client.files.upload(file_path=file_path)
             categories_str = ", ".join(config.ALLOWED_CATEGORIES)
 
             # Đưa chủ đề bạn nhập từ bàn phím vào Prompt gửi cho Gemini
@@ -86,7 +87,15 @@ def sort_images(input_dir, base_output_dir, target_topic):
                 config=types.GenerateContentConfig(response_mime_type="application/json")
             )
 
-            result = json.loads(response.text)
+            # Làm sạch chuỗi phản hồi phòng hờ AI trả về bọc trong ký tự markdown ```json
+            raw_text = response.text.strip()
+            if raw_text.startswith("```json"):
+                raw_text = raw_text[7:]
+            if raw_text.endswith("```"):
+                raw_text = raw_text[:-3]
+            raw_text = raw_text.strip()
+
+            result = json.loads(raw_text)
 
             # KIỂM TRA XEM AI CÓ ĐÁNH GIÁ LÀ KHỚP CHỦ ĐỀ KHÔNG
             is_matched = result.get("is_matched", False)
